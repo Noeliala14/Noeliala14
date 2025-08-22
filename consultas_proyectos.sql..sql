@@ -228,3 +228,194 @@ where FIRST_NAME = 'JOHNNY';
 
 select first_name as nombre, last_name as apellido
 from actor;
+
+-- 37. Encuentra el ID del actor más bajo y más alto en la tabla actor.
+
+select 
+	min(actor_id) as id_mas_bajo,
+	max(actor_id)as id_mas_alto
+from actor;
+
+-- 38. Cuenta cuántos actores hay en la tabla “actor”.
+
+select count(*) as total_actores
+from actor;
+
+--39. Selecciona todos los actores y ordénalos por apellido en orden ascendente.
+
+select *
+from actor 
+order by last_name asc;
+
+--40. Selecciona las primeras 5 películas de la tabla “film”.
+
+select *
+from film
+limit 5;
+
+--41. Agrupa los actores por su nombre y cuenta cuántos actores tienen el mismo nombre. ¿Cuál es el nombre más repetido?
+
+select first_name,
+count(first_name) as numero_veces
+from actor a 
+group by first_name 
+order by numero_veces desc
+limit 1;
+
+-- 42. Encuentra todos los alquileres y los nombres de los clientes que los realizaron.
+
+select 
+r.rental_id, c.first_name, c.last_name
+from rental as r
+join customer as c on r.customer_id = c.customer_id;
+
+-- 43. Muestra todos los clientes y sus alquileres si existen, incluyendo aquellos que no tienen alquileres.
+
+select 
+c.first_name,c.last_name,r.rental_date
+from customer as c
+left join rental as r on c.customer_id = r.customer_id;
+
+--44. Realiza un CROSS JOIN entre las tablas film y category. ¿Aporta valor esta consulta? ¿Por qué? Deja después de la consulta la contestación.
+
+select f.title,
+c.name as category_name
+from film as f
+cross join category as c;
+
+--No,como ya vimos en los videos tutoriales sobre consultas con JOIN ,un CROS JOIn no es útil ,ya que te da todas las combinaciones posibles
+--la cual no nos puede ser util para el analisis.
+--Resumidamente demasiada informacion no revelante a la pregunta principal.
+
+--45. Encuentra los actores que han participado en películas de la categoría 'Action'.
+
+select distinct 
+	a.first_name,
+	a.last_name
+from actor as a
+join film_actor as fa on a.actor_id = fa.actor_id 
+join film_category as fc on fa.film_id = fc.film_id 
+join category as c on fc.category_id = c.category_id 
+where c.name = 'Action';
+
+--46. Encuentra todos los actores que no han participado en películas.
+
+select 
+a.first_name,
+a.last_name
+from actor as a
+left join film_actor as fa
+on a.actor_id = fa.actor_id where fa.film_id  is null;
+
+--47. Selecciona el nombre de los actores y la cantidad de películas en las que han participado.
+
+select 
+a.first_name,
+a.last_name,
+count(fa.film_id) as numero_peliculas
+from actor as a
+join film_actor as fa
+on a.actor_id = fa.actor_id 
+group by a.actor_id;
+
+--48. Crea una vista llamada “actor_num_peliculas” que muestre los nombres de los actores y el número de películas en las que han participado.
+
+create view actor_num_peliculas as
+select
+a.first_name,
+a.last_name,
+count(fa.film_id) as numero_peliculas
+from actor as a
+join film_actor as fa
+on a.actor_id = fa.actor_id
+group by 
+a.actor_id;
+
+-- 49. Calcula el número total de alquileres realizados por cada cliente.
+
+select 
+c.first_name,
+c.last_name,
+count(r.rental_id) as total_alquileres
+from customer as c
+join rental as r
+on c.customer_id = r.customer_id 
+group by
+c.customer_id;
+
+-- 50. Calcula la duración total de las películas en la categoría 'Action'.
+
+select 
+sum(f.length) as duracion_total_action
+from film as f
+join film_category as fc
+on f.film_id = fc.film_id 
+join category as c
+on fc.category_id = c.category_id 
+where c.name = 'Action';
+
+--51. Crea una tabla temporal llamada “cliente_rentas_temporal” para almacenar el total de alquileres por cliente.
+
+create temporary table cliente_rentas_temporal as 
+select
+c.first_name,
+c.last_name,
+count(r.rental_id) as total_alquileres
+from customer as c
+join rental as r
+on c.customer_id = r.customer_id
+group by 
+c.customer_id;
+
+
+--52. Crea una tabla temporal llamada “peliculas_alquiladas” que almacene las películas que han sido alquiladas al menos 10 veces.
+
+create temporary table peliculas_alquiladas as 
+select
+	f.title,
+	count(r.rental_id) as numero_alquileres
+from film as f
+join inventory as i
+	on f.film_id = i.film_id
+join rental as r
+	on i.inventory_id = r.inventory_id
+group by
+f.film_id
+having
+count(r.rental_id) <= 10;
+
+--53. Encuentra el título de las películas que han sido alquiladas por el cliente con el nombre ‘Tammy Sanders’ y que aún no se han devuelto. Ordena
+--los resultados alfabéticamente por título de película.
+
+
+
+--54. Encuentra los nombres de los actores que han actuado en al menos una película que pertenece a la categoría ‘Sci-Fi’. Ordena los resultados
+--alfabéticamente por apellido.
+
+
+
+--55. Encuentra el nombre y apellido de los actores que han actuado en películas que se alquilaron después de que la película ‘Spartacus Cheaper’ se alquilara por primera vez. Ordena los resultados
+--alfabéticamente por apellido.
+
+--56. Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría ‘Music’.
+
+--57. Encuentra el título de todas las películas que fueron alquiladas por más de 8 días.
+
+--58. Encuentra el título de todas las películas que son de la misma categoría
+--que ‘Animation’.
+
+--59. Encuentra los nombres de las películas que tienen la misma duración que la película con el título ‘Dancing Fever’. Ordena los resultados
+--alfabéticamente por título de película.
+
+-- 60. Encuentra los nombres de los clientes que han alquilado al menos 7 películas distintas. Ordena los resultados alfabéticamente por apellido.
+
+
+--61. Encuentra la cantidad total de películas alquiladas por categoría y muestra el nombre de la categoría junto con el recuento de alquileres.
+
+
+-- 62. Encuentra el número de películas por categoría estrenadas en 2006.
+
+
+--63. Obtén todas las combinaciones posibles de trabajadores con las tiendas que tenemos.
+
+--64. Encuentra la cantidad total de películas alquiladas por cada cliente y muestra el ID del cliente, su nombre y apellido junto con la cantidad de películas alquiladas.
