@@ -91,3 +91,140 @@ join film f
 on fa.film_id = f.film_id 
 where f.title = 'EGG IGBY';
 
+-- 18. Selecciona todos los nombres de las películas únicos.
+select distinct title 
+from film;
+
+-- 19. Encuentra el título de las películas que son comedias y tienen una duración mayor a 180 minutos en la tabla “film”.
+ 
+select f.title
+from film as f
+join film_category as fc on f.film_id = fc.film_id 
+join category as c on fc.category_id = c.category_id
+where c.name = 'Comedy' and f.length >180;
+
+
+-- 20. Encuentra las categorías de películas que tienen un promedio de duración superior a 110 minutos y muestra el nombre de la categoría junto con el promedio de duración.
+
+select c.name, AVG(f.length) as promedio_duracion
+from film as f
+join film_category as fc on f.film_id = fc.film_id 
+join category as c on fc.category_id = c.category_id 
+group by c."name" 
+having AVG(F.length) > 110;
+
+-- 21. ¿Cuál es la media de duración del alquiler de las películas? 
+
+select AVG(rental_duration) as media_duracion_alquiler
+from film;
+
+-- 22. Crea una columna con el nombre y apellidos de todos los actores y actrices.
+
+select concat(first_name, ' ', last_name) as nombre_completo
+from actor;
+
+-- 23. Números de alquiler por día, ordenados por cantidad de alquiler de forma descendente.
+
+select date(rental_date) as dia,count(rental_id) as numero_alquileres
+from rental r group by dia
+order by numero_alquileres desc;
+
+
+-- 24. Encuentra las películas con una duración superior al promedio.
+
+select title, length
+from film
+where length > (
+		select AVG(length)
+		from film 
+);
+
+-- 25. Averigua el número de alquileres registrados por mes.
+
+select 
+	extract(year from rental_date) as anio,
+	extract(month from rental_date) as mes,
+	count(rental_id) as numero_alquileres
+from rental
+group by anio, mes
+order by anio, mes;
+
+-- 26. Encuentra el promedio, la desviación estándar y varianza del total pagado.
+
+select 
+	AVG(amount) as promedio_pagado,
+	stddev_pop(amount) as desviacion_estandar,
+	var_pop(amount) as varianza
+from payment;
+
+-- 27. ¿Qué películas se alquilan por encima del precio medio?
+
+select title, rental_rate
+from film
+where rental_rate > (
+select AVG(amount)
+from payment 
+);
+
+-- 28. Muestra el id de los actores que hayan participado en más de 40 películas.
+
+select actor_id, count(film_id) as numero_peliculas
+from film_actor 
+group by actor_id 
+having count(film_id) > 40;
+
+-- 29. Obtener todas las películas y, si están disponibles en el inventario, mostrar la cantidad disponible.
+
+select f.title,
+count(i.inventory_id) as cantidad_disponible
+from film as f
+left join inventory as i on f.film_id = i.film_id 
+group by f.title;
+
+
+-- 30. Obtener los actores y el número de películas en las que ha actuado.
+
+select a.first_name, a.last_name, count(fa.film_id) as numero_peliculas
+from actor as a
+join film_actor as fa on a.actor_id = fa.actor_id 
+group by a.actor_id;
+
+-- 31. Obtener todas las películas y mostrar los actores que han actuado en ellas, incluso si algunas películas no tienen actores asociados.
+
+select f.title, a.first_name, a.last_name
+from film as f
+left join film_actor as fa on f.film_id = fa.film_id 
+left join actor as a on fa.actor_id = a.actor_id;
+
+-- 32. Obtener todos los actores y mostrar las películas en las que han actuado, incluso si algunos actores no han actuado en ninguna película.
+
+select a.first_name, a.last_name, f.title 
+from actor as a
+left join film_actor as fa on a.actor_id = fa.actor_id 
+left join film as f on fa.film_id = f.film_id;
+
+-- 33. Obtener todas las películas que tenemos y todos los registros de alquiler.
+
+select f.title, r.rental_date
+from film as f
+full outer join inventory as i on f.film_id = i.film_id 
+full outer join rental as r on i.inventory_id = r.inventory_id;
+
+-- 34. Encuentra los 5 clientes que más dinero se hayan gastado con nosotros.
+
+select c.first_name, c.last_name, sum(p.amount) as total_gastado
+from customer as c
+join payment as p on c.customer_id = p.customer_id 
+group by c.customer_id order by total_gastado desc
+limit 5;
+
+-- 35. Selecciona todos los actores cuyo primer nombre es 'Johnny'.
+ 
+select *
+from ACTOR
+where FIRST_NAME = 'JOHNNY';
+
+--36. Renombra la columna “first_name” como Nombre y “last_name” como Apellido.
+
+select first_name as nombre, last_name as apellido
+from actor;
